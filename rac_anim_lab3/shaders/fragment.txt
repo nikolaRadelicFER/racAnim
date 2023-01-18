@@ -1,0 +1,74 @@
+#version 330 core
+#define MAX_ITERATIONS 1000
+
+uniform vec2 resolution;
+
+uniform float CenterX;
+uniform float CenterY;
+uniform float ZoomScale;
+
+in vec4 gl_FragCoord;
+out vec4 frag_color;
+out float frag_depth;
+
+vec4 GetIterations()
+{
+    //if you change the screen , change the value of offset X and offset Y till it the mandelbrot is centered on your screen
+    float offsetX = 1.0f;
+    float offsetY = 0.5f;
+    float real = ((gl_FragCoord.x / resolution.y - offsetX) * ZoomScale + CenterX )* 2.0;
+    float imag = ((gl_FragCoord.y / resolution.y - offsetY) * ZoomScale + CenterY )* 2.0;
+
+    int iterations = 0;
+    float real_number = real;
+    float imaginary = imag;
+
+    while (iterations < MAX_ITERATIONS)
+    {
+        float tmp_real = real;
+        real = (pow(real, 2) - pow(imag, 2)) + real_number;
+        imag = (2.0 * tmp_real * imag) + imaginary;
+
+        float dist = pow(real, 2) + pow(imag, 2);
+
+        if (dist > 5.0){
+            break;
+        }
+
+        ++iterations;
+    }
+    float k = float(iterations) / MAX_ITERATIONS;
+
+    vec4 color_f;
+    if (k < 0.14f){
+        color_f = vec4(0.157f, 0.227f, 0.421f, 1.0f);
+    }
+    else if (k < 0.28f){
+        color_f = vec4(0.553f, 0.216f, 0.619f, 1.0f);
+    }
+    else if (k < 0.43f){
+        color_f = vec4(0.945f, 0.204f, 0.518f, 1.0f);
+    }
+    else if (k < 0.57f){
+        color_f = vec4(1.0f, 0.376f, 0.365f, 1.0f);
+    }
+    else if (k < 0.71f){
+        color_f = vec4(0.996f, 0.663f, 0.349f, 1.0f);
+    }
+    else if (k < 0.86f){
+        color_f = vec4(1.0f, 0.7f, 0.378f, 1.0f);
+    }
+    else{
+        color_f = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    color_f = color_f.rgba;
+    color_f.a = 1.0f;
+    return color_f;
+}
+
+void main()
+{
+    vec4 color = GetIterations();
+    frag_color = color;
+}
